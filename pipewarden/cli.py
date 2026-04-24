@@ -35,6 +35,10 @@ def _load_jsonl(path: Path) -> List[Dict[str, Any]]:
 def cmd_validate(args: argparse.Namespace) -> int:
     schema_path = Path(args.schema)
 
+    if not schema_path.exists():
+        print(f"[ERROR] Schema path not found: {schema_path}", file=sys.stderr)
+        return 1
+
     if schema_path.is_dir():
         if not args.table:
             print("[ERROR] --table is required when --schema points to a directory.", file=sys.stderr)
@@ -85,12 +89,12 @@ def main(argv=None) -> None:
     parser = build_parser()
     args = parser.parse_args(argv)
 
-    if args.command == "validate":
-        sys.exit(cmd_validate(args))
-    else:
+    if args.command is None:
         parser.print_help()
         sys.exit(0)
 
-
-if __name__ == "__main__":
-    main()
+    if args.command == "validate":
+        sys.exit(cmd_validate(args))
+    else:
+        print(f"[ERROR] Unknown command: {args.command}", file=sys.stderr)
+        sys.exit(1)
