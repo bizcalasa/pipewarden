@@ -66,3 +66,24 @@ def validate_rows(
                 )
 
     return ValidationResult(errors=errors)
+
+
+def validate_rows_strict(
+    rows: List[Dict[str, Any]],
+    schema: TableSchema,
+) -> ValidationResult:
+    """Validate rows against *schema*, disallowing any extra fields.
+
+    This is a convenience wrapper around :func:`validate_rows` with
+    ``allow_extra_fields=False`` made explicit, intended for contexts where
+    strict schema conformance is required.
+
+    Args:
+        rows: Sequence of dicts representing data rows.
+        schema: The TableSchema to validate against.
+
+    Returns:
+        A :class:`~pipewarden.validator.ValidationResult` describing every
+        validation error found (or none if the data is valid).
+    """
+    return validate_rows(rows, schema, allow_extra_fields=False)
