@@ -54,6 +54,21 @@ def export_results_csv(results: List[ValidationResult]) -> str:
     return output.getvalue()
 
 
+def export_results_summary(results: List[ValidationResult]) -> str:
+    """Return a human-readable plain-text summary of validation results.
+
+    Each line contains the table name, validity status, and error count.
+    Invalid tables are followed by an indented list of their errors.
+    """
+    lines: List[str] = []
+    for result in results:
+        status = "PASS" if result.is_valid else "FAIL"
+        lines.append(f"[{status}] {result.table_name} — {result.error_count} error(s)")
+        for error in result.errors:
+            lines.append(f"  row {error.row_index}, {error.field_name}: {error.message}")
+    return "\n".join(lines)
+
+
 def export_profile_json(report: ProfileReport) -> str:
     """Return a JSON string representing a ProfileReport."""
     fields = {}
