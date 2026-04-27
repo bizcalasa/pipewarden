@@ -72,3 +72,21 @@ def apply_rules(
                     )
                 )
     return violations
+
+
+def summarize_violations(violations: List[RuleViolation]) -> Dict[str, int]:
+    """Return a count of violations grouped by rule name.
+
+    Useful for quickly identifying which rules are triggered most often
+    across a dataset.
+
+    Args:
+        violations: The list of violations returned by :func:`apply_rules`.
+
+    Returns:
+        A dictionary mapping each rule name to the number of times it fired.
+    """
+    summary: Dict[str, int] = {}
+    for violation in violations:
+        summary[violation.rule_name] = summary.get(violation.rule_name, 0) + 1
+    return summary
