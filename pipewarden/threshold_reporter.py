@@ -26,3 +26,24 @@ def threshold_summary(report: ThresholdReport) -> str:
     n = report.violation_count
     noun = "violation" if n == 1 else "violations"
     return f"thresholds: FAILED ({n} {noun})"
+
+
+def format_violations_by_table(report: ThresholdReport) -> str:
+    """Return a multi-line report with violations grouped by table name.
+
+    Violations for the same table are listed together under a table header,
+    making it easier to scan results when multiple rules apply to one table.
+    """
+    if report.passed:
+        return "Threshold checks passed. No violations found."
+
+    grouped: dict[str, list[ThresholdViolation]] = {}
+    for v in report.violations:
+        grouped.setdefault(v.table, []).append(v)
+
+    lines = [f"Threshold violations ({report.violation_count} found):"]
+    for table, violations in grouped.items():
+        lines.append(f"  [{table}]")
+        for v in violations:
+            lines.append(f"    ❌  {v.rule_name}: {v.message}")
+    return "\n".join(lines)
