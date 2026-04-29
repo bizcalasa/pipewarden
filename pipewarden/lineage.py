@@ -52,6 +52,21 @@ class LineageGraph:
             nodes.update(targets)
         return list(nodes)
 
+    def ancestors(self, node: LineageNode) -> List[LineageNode]:
+        """Return all transitive upstream ancestors for a given node.
+
+        Performs a breadth-first traversal following upstream edges until
+        no new sources are found.
+        """
+        visited: List[LineageNode] = []
+        queue = self.upstream(node)
+        while queue:
+            current = queue.pop(0)
+            if current not in visited:
+                visited.append(current)
+                queue.extend(self.upstream(current))
+        return visited
+
     def to_dict(self) -> Dict[str, List[str]]:
         """Serialize the graph to a JSON-compatible dictionary."""
         return {
