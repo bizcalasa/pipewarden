@@ -75,6 +75,15 @@ def test_filter_by_tag():
     assert results[0].name == "pii_table"
 
 
+def test_filter_by_tag_returns_empty_when_no_match():
+    """filter_by_tag should return an empty list when no entries carry the tag."""
+    catalog = SchemaCatalog()
+    catalog.register(_make_schema("a"), tags=["public"])
+    catalog.register(_make_schema("b"), tags=["internal"])
+    results = catalog.filter_by_tag("pii")
+    assert results == []
+
+
 def test_entry_has_tag_true():
     entry = CatalogEntry(name="t", schema=_make_schema("t"), tags=["pii"])
     assert entry.has_tag("pii") is True
