@@ -62,6 +62,12 @@ def test_dependents_of_finds_downstream():
     assert g.dependents_of("clean") == ["agg"]
 
 
+def test_dependents_of_missing_returns_empty():
+    """A node not present in the graph should yield no dependents."""
+    g = DependencyGraph()
+    assert g.dependents_of("ghost") == []
+
+
 def test_resolve_order_simple_chain():
     g = _graph(
         DependencyNode("agg", depends_on=["clean"]),
@@ -86,3 +92,22 @@ def test_resolve_order_circular_raises():
     )
     with pytest.raises(ValueError, match="Circular dependency"):
         g.resolve_order()
+
+
+def test_resolve_order_diamond():
+    """A diamond-shaped dependency graph should resolve without errors.
+
+    Both 'left' and 'right' depend on 'root', and 'tip' depends on both.
+    The resolved order must place 'root' first and 'tip' last.
+    """
+    g = _graph(
+        DependencyNode("root"),
+        DependencyNode("left", depends_on=["root"]),
+        DependencyNode("right", depends_on=["root"]),
+        DependencyNode("tip", depends_on=["left", "right"]),
+    )
+    order = g.resolve_order()
+    assert order.index("root") < order.index("left")
+    assert order.index("root") < order.index("right")
+    assert order.index("left") < order.index("tip")
+    assert order.index("right") < order.index("tip")
