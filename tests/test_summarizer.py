@@ -60,6 +60,16 @@ def test_summarize_helper():
     assert s.total_errors == 5
 
 
+def test_total_tables_equals_valid_plus_invalid():
+    """Ensure valid_tables + invalid_tables always equals total_tables."""
+    s = PipelineSummary()
+    s.add_result("a", _ok_result())
+    s.add_result("b", _fail_result(1))
+    s.add_result("c", _fail_result(2))
+    s.add_result("d", _ok_result())
+    assert s.valid_tables + s.invalid_tables == s.total_tables
+
+
 # --- summary_reporter tests ---
 
 def test_format_pipeline_summary_clean():
