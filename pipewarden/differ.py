@@ -37,6 +37,15 @@ class SchemaDiff:
             lines.append(f"  ~ NULL    {msg}")
         return "\n".join(lines)
 
+    def is_breaking(self) -> bool:
+        """Return True if the diff contains breaking changes.
+
+        Breaking changes are those that may cause downstream consumers or
+        pipelines to fail: removed fields and type changes are considered
+        breaking, while added fields and nullability changes are not.
+        """
+        return bool(self.removed_fields or self.type_changes)
+
 
 def diff_schemas(old: TableSchema, new: TableSchema) -> SchemaDiff:
     """Compare two TableSchema objects and return a SchemaDiff."""
@@ -51,7 +60,7 @@ def diff_schemas(old: TableSchema, new: TableSchema) -> SchemaDiff:
     result.added_fields = sorted(new_names - old_names)
     result.removed_fields = sorted(old_names - new_names)
 
-    for name in old_names & new_names:
+    for name in sorted(old_names & new_names):
         old_f = old_fields[name]
         new_f = new_fields[name]
         if old_f.field_type != new_f.field_type:
